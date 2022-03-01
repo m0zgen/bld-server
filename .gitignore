@@ -1,0 +1,7 @@
+.env.production
+config/prod
+download
+public
+tests
+node_monules
+.DS_Store
