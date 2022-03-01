@@ -1,0 +1,22 @@
+{
+  "name": "bld-server",
+  "version": "1.0.0",
+  "description": "Web BLD Host Lists Server",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [
+    "bld",
+    "web"
+  ],
+  "author": "Yevgeniy Goncharov",
+  "license": "ISC",
+  "dependencies": {
+    "dotenv-flow": "^3.2.0",
+    "express": "^4.17.3",
+    "node-datetime": "^2.1.2",
+    "node-yaml-config": "^1.0.0",
+    "shelljs": "^0.8.5"
+  }
+}
