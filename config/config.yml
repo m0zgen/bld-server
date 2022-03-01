@@ -1,0 +1,18 @@
+default:
+  server:
+    # Server port listening
+    port: 3300
+    # Interval in minutes
+    update_interval: 1
+  download_dir:
+    download
+  public_dir:
+    public
+  lists:
+    bl:
+      - https://raw.githubusercontent.com/m0zgen/dns-hole/master/dns-blacklist.txt
+    wl:
+      - https://raw.githubusercontent.com/m0zgen/dns-hole/master/whitelist.txt
+      - https://raw.githubusercontent.com/m0zgen/dns-hole/master/bld-testing/wl-testing
+      - https://raw.githubusercontent.com/m0zgen/dns-hole/master/vendors-wl/microsoft.txt
+      - https://raw.githubusercontent.com/m0zgen/dns-hole/master/vendors-wl/google.txt
