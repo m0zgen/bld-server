@@ -90,6 +90,8 @@ function getList(list, dir) {
 
         sh.exec(`sed -i '' '/#/d' ${downloadedFile}`)
         sh.exec(`sed -i '' '/^$/d'  ${downloadedFile}`);
+        sh.exec(`sed -i '' -e "s/0.0.0.[[:digit:]]\\ //g" -e "s/.0.0\\ //g" -e "s/0.01\\ //g" ${downloadedFile}`)
+        // sh.exec(`sed -i '' -e 's/^[ \\t]*//' -e "s/127.0.0.1\\ //g" -e "s/127.0.0.1\\        //g" -e "s/127.0.0.1\\        //g" ${downloadedFile}`)
 
         sh.exec(`cat ${downloadedFile} >> ${dir}/tmp.txt`)
         sh.exec(`sort -u ${dir}/tmp.txt -o ${public_dir}/${publicFile}.txt`)
@@ -112,6 +114,7 @@ function run_updater() {
 
 function always_run() {
     setInterval(run_updater, waitTime);
+
 };
 
 // Go
@@ -126,7 +129,27 @@ always_run();
 
 // Server
 // ---------------------------------------------------\
+
+app.set("view engine", "pug");
+
 app.use(express.static('public'));
+
+app.get('/', function(req, res) {
+
+    var time = getDateTime();
+
+    var wl_count = sh.exec(`cat ${public_dir}/wl.txt | wc -l`)
+    var bl_count = sh.exec(`cat ${public_dir}/bl.txt | wc -l`)
+
+    res.render("index", {
+        title: "BLD Server",
+        message: "BLD Server is UP!",
+        time: time,
+        bl_count: bl_count,
+        wl_count: wl_count
+    });
+
+});
 
 app.listen(PORT, function () {
     console.log(`BLD Server server listening on port ${PORT}`)
