@@ -1,9 +1,14 @@
+# Envs
 .env*
 .env.production
-config/prod
+
+# Server works dirs
+config/prod*
 download
 public
 tests
 node_modules
+
+# System files
 .DS_Store
 .idea
