@@ -104,11 +104,6 @@ function getList(list, dir) {
 
         sh.exec(` sed -i -e "s/^[[:space:]]*//g" ${downloadedFile}`)
 
-        // sh.exec(`awk '{$0=tolower($0);$1=$1}1' ${downloadedFile}`)
-
-        // sh.exec(`sed -i '' -e "s/0.0.0.[[:digit:]]\\ //g" -e "s/.0.0\\ //g" -e "s/0.01\\ //g" ${downloadedFile}`)
-        // sh.exec(`sed -i '' -e 's/^[ \\t]*//' -e "s/127.0.0.1\\ //g" -e "s/127.0.0.1\\        //g" -e "s/127.0.0.1\\        //g" ${downloadedFile}`)
-
         sh.exec(`cat ${downloadedFile} >> ${dir}/tmp.txt`)
         sh.exec(`sort -u ${dir}/tmp.txt -o ${public_dir}/${publicFile}.txt`)
 
