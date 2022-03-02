@@ -88,9 +88,25 @@ function getList(list, dir) {
         let type = dir.split('/')
         let publicFile = type[type.length - 1]
 
-        sh.exec(`sed -i '' '/#/d' ${downloadedFile}`)
-        sh.exec(`sed -i '' '/^$/d'  ${downloadedFile}`);
-        sh.exec(`sed -i '' -e "s/0.0.0.[[:digit:]]\\ //g" -e "s/.0.0\\ //g" -e "s/0.01\\ //g" ${downloadedFile}`)
+        sh.exec(`sed -i '' \
+        -e '/#/d' \
+        -e '/^$/d' \
+        -e "s/^0.0.0.[[:digit:]]\\ //g" \
+        -e "s/^0.0.0.0$//g" \
+        -e "s/^localhost$//g" \
+        -e "s/^127.0.0.[[:digit:]]//g" \
+        -e "s/^.0.0\\ //g" \
+        -e "s/^.0.0.0\\ //g" \
+        -e "s/^0.01\\ //g" \
+        -e "s/^0.01[[:space:]]*//g" \
+        -e "s/^||//g" \
+        ${downloadedFile}`)
+
+        sh.exec(` sed -i -e "s/^[[:space:]]*//g" ${downloadedFile}`)
+
+        // sh.exec(`awk '{$0=tolower($0);$1=$1}1' ${downloadedFile}`)
+
+        // sh.exec(`sed -i '' -e "s/0.0.0.[[:digit:]]\\ //g" -e "s/.0.0\\ //g" -e "s/0.01\\ //g" ${downloadedFile}`)
         // sh.exec(`sed -i '' -e 's/^[ \\t]*//' -e "s/127.0.0.1\\ //g" -e "s/127.0.0.1\\        //g" -e "s/127.0.0.1\\        //g" ${downloadedFile}`)
 
         sh.exec(`cat ${downloadedFile} >> ${dir}/tmp.txt`)
@@ -137,7 +153,6 @@ app.use(express.static('public'));
 app.get('/', function(req, res) {
 
     var time = getDateTime();
-
     var wl_count = sh.exec(`cat ${public_dir}/wl.txt | wc -l`)
     var bl_count = sh.exec(`cat ${public_dir}/bl.txt | wc -l`)
 

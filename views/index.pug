@@ -3,6 +3,8 @@ html
         title= title
     body
         h1= message
-        <p>Blocked domains count: #{bl_count}</p>
-        <p>White listed count: #{wl_count}</p>
+        <ul>
+            <li><p><a href="/bl.txt" target="_blank">BL List</a>. Count: #{bl_count}</p></li>
+            <li><p><a href="/wl.txt" target="_blank">WL List</a>. Count: #{wl_count}</p></li>
+        </ul>
         <p>Server time: #{time}</p>
