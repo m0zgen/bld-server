@@ -3,13 +3,13 @@
 const fs = require('fs');
 const path = require('path')
 const https = require('https');
+const express = require("express")
 
 // As sh or shell
 const sh = require('shelljs')
 require('shelljs/global');
-const express = require("express")
-// Load config
 
+// Load config
 require('dotenv-flow').config();
 const yaml_config = require('node-yaml-config');
 // Load external functions
