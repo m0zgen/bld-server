@@ -4,6 +4,7 @@ const fs = require('fs');
 const path = require('path')
 const https = require('https');
 const express = require("express")
+const replacer = require('replace-in-file')
 
 // As sh or shell
 const sh = require('shelljs')
@@ -19,7 +20,6 @@ const {checkFolder, getDateTime, clearFile} = require("./modules/helper");
 // Config vars init
 // ---------------------------------------------------\
 console.log(`ENV: ${process.env.CONFIG}`)
-
 const envpath = path.join(__dirname, ".env")
 
 function getConfig() {
@@ -70,6 +70,45 @@ const downloadFile = (url, dir) => {
 
 }
 
+// Clear file content
+function runReplacer(file, target) {
+    const options = {
+        files: file,
+        from: [
+            /(^(^127.0.0.1.|^0.0.0.\d.|^# 0.0.0.\d.|^# 127.0.0.\d|^ ))/gim,
+            /^\s/g,
+            / #[a-aA-Z].*$/gm,
+            /^[!@#\\$%\\^\\&*\\\s\\)\\(+=._-].+$/gm,
+            /.*#$/gm,
+            /(^[ \t]*\n)/gm,
+            /[!@#$%^&*()_+\=\[\]{};':"\\|,<>\/?].+$/gm
+        ],
+        to: '',
+    };
+
+    try {
+        const results = replacer.sync(options);
+        console.log('Replacement results:', results);
+    }
+    catch (error) {
+        console.error('Error occurred:', error);
+    }
+}
+
+// Appending data to tmp file asynchronously
+function appendTo(from, to) {
+
+    var new_data = fs.readFileSync(from, 'utf8');
+
+    // new_data = "\nThis data will be appended at the end of the file.";
+    fs.appendFile(to, new_data , (err) => {
+        if(err)
+            throw err;
+        console.log(`Date from ${from} to ${to} was appended successfully`);
+    });
+
+}
+
 let downloadedFiles = 0
 function getList(list, dir) {
     checkFolder(dir)
@@ -88,27 +127,32 @@ function getList(list, dir) {
         let type = dir.split('/')
         let publicFile = type[type.length - 1]
 
-        sh.exec(`sed -i '' \
-        -e '/#/d' \
-        -e '/^$/d' \
-        -e "s/^0.0.0.[[:digit:]]\\ //g" \
-        -e "s/^0.0.0.0$//g" \
-        -e "s/^localhost$//g" \
-        -e "s/^127.0.0.[[:digit:]]//g" \
-        -e "s/^.0.0\\ //g" \
-        -e "s/^.0.0.0\\ //g" \
-        -e "s/^0.01\\ //g" \
-        -e "s/^0.01[[:space:]]*//g" \
-        -e "s/^||//g" \
-        ${downloadedFile}`)
+        // sh.exec(`sed -i '' \
+        // -e '/^#/d' \
+        // -e '/^$/d' \
+        // -e "s/^0.0.0.[[:digit:]]\\ //g" \
+        // -e "s/^0.0.0.0$//g" \
+        // -e "s/^localhost$//g" \
+        // -e "s/^127.0.0.[[:digit:]]//g" \
+        // -e "s/^.0.0\\ //g" \
+        // -e "s/^.0.0.0\\ //g" \
+        // -e "s/^0.01\\ //g" \
+        // -e "s/^0.01[[:space:]]*//g" \
+        // -e "s/^||//g" \
+        // ${downloadedFile}`)
+        //
+        // sh.exec(` sed -i -e "s/^[[:space:]]*//g" ${downloadedFile}`)
 
-        sh.exec(` sed -i -e "s/^[[:space:]]*//g" ${downloadedFile}`)
+        runReplacer(downloadedFile)
+
+        // TODO: need to research
+        // appendTo(downloadedFile, `${dir}/tmp.txt`)
 
         sh.exec(`cat ${downloadedFile} >> ${dir}/tmp.txt`)
         sh.exec(`sort -u ${dir}/tmp.txt -o ${public_dir}/${publicFile}.txt`)
 
         downloadedFiles++
-        console.log(`${downloadedFiles} downloaded`)
+        console.log(`${downloadedFiles}. ${downloadedFile} - downloaded and formatted`)
     })
 }
 
