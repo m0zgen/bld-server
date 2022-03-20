@@ -69,13 +69,13 @@ const downloadFile = (url, dir) => {
         const publicFile = type[type.length - 1]
 
         // Move existing file for comparing in future
-        if (fs.existsSync(outputPath)) {
-            fs.rename(outputPath, `${outputPath}_prev`, (err) => {
-                if (err){
-                    console.log(`Can't move file from ${outputPath} to ${outputPath}_prev`)
-                }
-            })
-        }
+        // if (fs.existsSync(`${outputPath}_last`)) {
+        //     fs.rename(`${outputPath}_last`, `${outputPath}_prev`, (err) => {
+        //         if (err){
+        //             console.log(`Can't move file from ${outputPath} to ${outputPath}_prev`)
+        //         }
+        //     })
+        // }
 
         https.get(url, res => {
             if (res.statusCode === 200) {
@@ -96,7 +96,9 @@ function runReplacer(file, target) {
             /(^(^127.0.0.1.|^0.0.0.\d.|^# 0.0.0.\d.|^# 127.0.0.\d|^ ))/gim,
             /^\s/g,
             / #[a-aA-Z].*$/gm,
-            /^[!@#\\$%\\^\\&*\\\s\\)\\(+=._-].+$/gm,
+            /.*:.*$/gm,
+            // /^[!@#\\$%\\^\\&*\\\s\\)\\(+=._-].+$/gm,
+            /^[!@#\$%\^\&*\)\(+=._-].+$/gm,
             /.*#$/gm,
             /(^[ \t]*\n)/gm,
             /[!@#$%^&*()_+\=\[\]{};':"\\|,<>\/?].+$/gm
@@ -127,6 +129,14 @@ function appendTo(from, to) {
 
 }
 
+function copy(from, to, _prefix) {
+    fs.copyFile(from, `${to}${_prefix}`, (err) => {
+        if (err){
+            console.log(`Can't copy file from ${from} to ${to}${_prefix}`)
+        }
+    })
+}
+
 let downloadedFiles = 0
 function getList(list, dir) {
     checkFolder(dir)
@@ -134,7 +144,7 @@ function getList(list, dir) {
 
     let type = dir.split('/')
     let publicFile = type[type.length - 1]
-    clearFile(`${public_dir}/${publicFile}.txt`)
+    // clearFile(`${public_dir}/${publicFile}.txt`)
 
     list.forEach( async (url, index) => {
         await downloadFile(url, dir)
@@ -161,26 +171,41 @@ function getList(list, dir) {
         //
         // sh.exec(` sed -i -e "s/^[[:space:]]*//g" ${downloadedFile}`)
 
-        const {size: prevSize} = fs.statSync(`${downloadedFile}_prev`);
-        const {size: nowSize} = fs.statSync(downloadedFile);
+        if (fs.existsSync(`${downloadedFile}_prev`)) {
+            var {size: prevSize} = fs.statSync(`${downloadedFile}_prev`);
+            var {size: nowSize} = fs.statSync(downloadedFile);
+            console.log(colorBlue, `File ${downloadedFile}_prev 1: ${prevSize} and File ${downloadedFile} 2: ${nowSize}`)
+        } else {
+            // Move existing file for comparing in future
+            copy(downloadedFile, downloadedFile, '_prev')
+            runReplacer(downloadedFile)
 
-        console.log(`File ${downloadedFile}_prev 1: ${prevSize} and File ${downloadedFile} 2: ${nowSize}`)
+            // After sort copy to future file operations
+            copy(downloadedFile, downloadedFile, '_sorted')
+        }
 
         if (prevSize === nowSize) {
             console.log(colorGreen, `Files is the same`)
+            sh.exec(`cat ${downloadedFile}_sorted >> ${dir}/tmp.txt`)
         } else {
             console.log(colorYellow, `Files is different, run replacer...`)
+
+            // Move existing file for comparing in future
+            copy(downloadedFile, downloadedFile, '_prev')
             runReplacer(downloadedFile)
+
+            copy(downloadedFile, downloadedFile, '_sorted')
+            sh.exec(`cat ${downloadedFile} >> ${dir}/tmp.txt`)
         }
 
         // TODO: need to research
         // appendTo(downloadedFile, `${dir}/tmp.txt`)
 
-        sh.exec(`cat ${downloadedFile} >> ${dir}/tmp.txt`)
+        // sh.exec(`cat ${downloadedFile} >> ${dir}/tmp.txt`)
         sh.exec(`sort -u ${dir}/tmp.txt -o ${public_dir}/${publicFile}.txt`)
 
         downloadedFiles++
-        console.log(`${downloadedFiles}. ${downloadedFile} - downloaded and formatted`)
+        console.log(`${downloadedFiles}. ${downloadedFile} - downloaded and processed`)
     })
 }
 
