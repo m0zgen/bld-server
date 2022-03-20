@@ -68,15 +68,6 @@ const downloadFile = (url, dir) => {
         const type = dir.split('/')
         const publicFile = type[type.length - 1]
 
-        // Move existing file for comparing in future
-        // if (fs.existsSync(`${outputPath}_last`)) {
-        //     fs.rename(`${outputPath}_last`, `${outputPath}_prev`, (err) => {
-        //         if (err){
-        //             console.log(`Can't move file from ${outputPath} to ${outputPath}_prev`)
-        //         }
-        //     })
-        // }
-
         https.get(url, res => {
             if (res.statusCode === 200) {
                 res.pipe(file).on('close', resolve)
@@ -97,7 +88,7 @@ function runReplacer(file, target) {
             /^\s/g,
             / #[a-aA-Z].*$/gm,
             /.*:.*$/gm,
-            // /^[!@#\\$%\\^\\&*\\\s\\)\\(+=._-].+$/gm,
+            /^[!@#\\$%\\^\\&*\\\s\\)\\(+=._-].+$/gm,
             /^[!@#\$%\^\&*\)\(+=._-].+$/gm,
             /.*#$/gm,
             /(^[ \t]*\n)/gm,
@@ -137,6 +128,24 @@ function copy(from, to, _prefix) {
     })
 }
 
+function sed(file) {
+    sh.exec(`sed -i '' \
+    -e '/^#/d' \
+    -e '/^$/d' \
+    -e "s/^0.0.0.[[:digit:]]\\ //g" \
+    -e "s/^0.0.0.0$//g" \
+    -e "s/^localhost$//g" \
+    -e "s/^127.0.0.[[:digit:]]//g" \
+    -e "s/^.0.0\\ //g" \
+    -e "s/^.0.0.0\\ //g" \
+    -e "s/^0.01\\ //g" \
+    -e "s/^0.01[[:space:]]*//g" \
+    -e "s/^||//g" \
+    ${file}`)
+
+    sh.exec(` sed -i -e "s/^[[:space:]]*//g" ${file}`)
+}
+
 let downloadedFiles = 0
 function getList(list, dir) {
     checkFolder(dir)
@@ -155,21 +164,7 @@ function getList(list, dir) {
         let type = dir.split('/')
         let publicFile = type[type.length - 1]
 
-        // sh.exec(`sed -i '' \
-        // -e '/^#/d' \
-        // -e '/^$/d' \
-        // -e "s/^0.0.0.[[:digit:]]\\ //g" \
-        // -e "s/^0.0.0.0$//g" \
-        // -e "s/^localhost$//g" \
-        // -e "s/^127.0.0.[[:digit:]]//g" \
-        // -e "s/^.0.0\\ //g" \
-        // -e "s/^.0.0.0\\ //g" \
-        // -e "s/^0.01\\ //g" \
-        // -e "s/^0.01[[:space:]]*//g" \
-        // -e "s/^||//g" \
-        // ${downloadedFile}`)
-        //
-        // sh.exec(` sed -i -e "s/^[[:space:]]*//g" ${downloadedFile}`)
+        // sed(downloadedFile)
 
         if (fs.existsSync(`${downloadedFile}_prev`)) {
             var {size: prevSize} = fs.statSync(`${downloadedFile}_prev`);
@@ -178,7 +173,9 @@ function getList(list, dir) {
         } else {
             // Move existing file for comparing in future
             copy(downloadedFile, downloadedFile, '_prev')
-            runReplacer(downloadedFile)
+
+            // runReplacer(downloadedFile)
+            sed(downloadedFile)
 
             // After sort copy to future file operations
             copy(downloadedFile, downloadedFile, '_sorted')
@@ -213,6 +210,8 @@ function getList(list, dir) {
 function download() {
     getList(wl_list, `${download_dir}/wl`)
     getList(bl_list, `${download_dir}/bl`)
+    // sed(`${public_dir}/wl.txt`)
+    // sed(`${public_dir}/bl.txt`)
     console.log(`Run timer: ${min} min (${getDateTime()})`)
 }
 
