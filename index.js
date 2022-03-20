@@ -169,7 +169,6 @@ function run_updater() {
 
 function always_run() {
     setInterval(run_updater, waitTime);
-
 };
 
 // Go
@@ -192,8 +191,8 @@ app.use(express.static('public'));
 app.get('/', function(req, res) {
 
     var time = getDateTime();
-    var wl_count = sh.exec(`cat ${public_dir}/wl.txt | wc -l`)
-    var bl_count = sh.exec(`cat ${public_dir}/bl.txt | wc -l`)
+    // var wl_count = sh.exec(`cat ${public_dir}/wl.txt | wc -l`)
+    // var bl_count = sh.exec(`cat ${public_dir}/bl.txt | wc -l`)
 
     res.render("index", {
         title: "BLD Server",
