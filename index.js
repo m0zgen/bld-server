@@ -43,9 +43,18 @@ const download_dir = `./${config.download_dir}`;
 const public_dir = `${config.public_dir}`
 const min = config.server.update_interval;
 const waitTime = min * 60 * 1000; // = minutes
+
 // Web server
 const PORT = process.env.PORT || config.server.port
 const app = express()
+
+// Colors
+const colorRed='\x1b[31m%s\x1b[0m'
+const colorGreen='\x1b[32m%s\x1b[0m'
+const colorYellow='\x1b[33m%s\x1b[0m'
+const colorBlue='\x1b[34m%s\x1b[0m'
+const colorMagents='\x1b[35m%s\x1b[0m'
+const colorCyan='\x1b[36m%s\x1b[0m'
 
 // Actions
 // ---------------------------------------------------\
@@ -58,6 +67,15 @@ const downloadFile = (url, dir) => {
         const file = fs.createWriteStream(outputPath)
         const type = dir.split('/')
         const publicFile = type[type.length - 1]
+
+        // Move existing file for comparing in future
+        if (fs.existsSync(outputPath)) {
+            fs.rename(outputPath, `${outputPath}_prev`, (err) => {
+                if (err){
+                    console.log(`Can't move file from ${outputPath} to ${outputPath}_prev`)
+                }
+            })
+        }
 
         https.get(url, res => {
             if (res.statusCode === 200) {
@@ -143,7 +161,17 @@ function getList(list, dir) {
         //
         // sh.exec(` sed -i -e "s/^[[:space:]]*//g" ${downloadedFile}`)
 
-        runReplacer(downloadedFile)
+        const {size: prevSize} = fs.statSync(`${downloadedFile}_prev`);
+        const {size: nowSize} = fs.statSync(downloadedFile);
+
+        console.log(`File ${downloadedFile}_prev 1: ${prevSize} and File ${downloadedFile} 2: ${nowSize}`)
+
+        if (prevSize === nowSize) {
+            console.log(colorGreen, `Files is the same`)
+        } else {
+            console.log(colorYellow, `Files is different, run replacer...`)
+            runReplacer(downloadedFile)
+        }
 
         // TODO: need to research
         // appendTo(downloadedFile, `${dir}/tmp.txt`)
@@ -191,8 +219,8 @@ app.use(express.static('public'));
 app.get('/', function(req, res) {
 
     var time = getDateTime();
-    // var wl_count = sh.exec(`cat ${public_dir}/wl.txt | wc -l`)
-    // var bl_count = sh.exec(`cat ${public_dir}/bl.txt | wc -l`)
+    var wl_count = sh.exec(`cat ${public_dir}/wl.txt | wc -l`)
+    var bl_count = sh.exec(`cat ${public_dir}/bl.txt | wc -l`)
 
     res.render("index", {
         title: "BLD Server",
