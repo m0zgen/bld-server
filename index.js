@@ -86,6 +86,7 @@ function runReplacer(file, target) {
         from: [
             /(^(^127.0.0.1.|^0.0.0.\d.|^# 0.0.0.\d.|^# 127.0.0.\d|^ ))/gim,
             /^\s/g,
+            /^$/gm,
             / #[a-aA-Z].*$/gm,
             /.*:.*$/gm,
             /^[!@#\\$%\\^\\&*\\\s\\)\\(+=._-].+$/gm,
@@ -106,20 +107,6 @@ function runReplacer(file, target) {
     }
 }
 
-// Appending data to tmp file asynchronously
-function appendTo(from, to) {
-
-    var new_data = fs.readFileSync(from, 'utf8');
-
-    // new_data = "\nThis data will be appended at the end of the file.";
-    fs.appendFile(to, new_data , (err) => {
-        if(err)
-            throw err;
-        console.log(`Date from ${from} to ${to} was appended successfully`);
-    });
-
-}
-
 function copy(from, to, _prefix) {
     fs.copyFile(from, `${to}${_prefix}`, (err) => {
         if (err){
@@ -128,22 +115,12 @@ function copy(from, to, _prefix) {
     })
 }
 
-function sed(file) {
-    sh.exec(`sed -i '' \
-    -e '/^#/d' \
-    -e '/^$/d' \
-    -e "s/^0.0.0.[[:digit:]]\\ //g" \
-    -e "s/^0.0.0.0$//g" \
-    -e "s/^localhost$//g" \
-    -e "s/^127.0.0.[[:digit:]]//g" \
-    -e "s/^.0.0\\ //g" \
-    -e "s/^.0.0.0\\ //g" \
-    -e "s/^0.01\\ //g" \
-    -e "s/^0.01[[:space:]]*//g" \
-    -e "s/^||//g" \
-    ${file}`)
-
-    sh.exec(` sed -i -e "s/^[[:space:]]*//g" ${file}`)
+function sort() {
+    return new Promise((resolve, reject) => {
+        sh.exec(`sort -u ${download_dir}/wl/tmp.txt -o ${public_dir}/wl.txt`)
+        sh.exec(`sort -u ${download_dir}/bl/tmp.txt -o ${public_dir}/bl.txt`)
+        resolve(`Files is published!`)
+    })
 }
 
 let downloadedFiles = 0
@@ -164,8 +141,6 @@ function getList(list, dir) {
         let type = dir.split('/')
         let publicFile = type[type.length - 1]
 
-        // sed(downloadedFile)
-
         if (fs.existsSync(`${downloadedFile}_prev`)) {
             var {size: prevSize} = fs.statSync(`${downloadedFile}_prev`);
             var {size: nowSize} = fs.statSync(downloadedFile);
@@ -173,32 +148,25 @@ function getList(list, dir) {
         } else {
             // Move existing file for comparing in future
             copy(downloadedFile, downloadedFile, '_prev')
-
-            // runReplacer(downloadedFile)
-            sed(downloadedFile)
-
-            // After sort copy to future file operations
+            runReplacer(downloadedFile)
             copy(downloadedFile, downloadedFile, '_sorted')
         }
 
         if (prevSize === nowSize) {
             console.log(colorGreen, `Files is the same`)
-            sh.exec(`cat ${downloadedFile}_sorted >> ${dir}/tmp.txt`)
+
         } else {
             console.log(colorYellow, `Files is different, run replacer...`)
-
             // Move existing file for comparing in future
             copy(downloadedFile, downloadedFile, '_prev')
             runReplacer(downloadedFile)
-
             copy(downloadedFile, downloadedFile, '_sorted')
-            sh.exec(`cat ${downloadedFile} >> ${dir}/tmp.txt`)
         }
 
-        // TODO: need to research
-        // appendTo(downloadedFile, `${dir}/tmp.txt`)
+        sh.exec(`echo '\n' >> ${dir}/tmp.txt`)
+        sh.exec(`cat ${downloadedFile}_sorted >> ${dir}/tmp.txt`)
+        sh.exec(`echo '\n' >> ${dir}/tmp.txt`)
 
-        // sh.exec(`cat ${downloadedFile} >> ${dir}/tmp.txt`)
         sh.exec(`sort -u ${dir}/tmp.txt -o ${public_dir}/${publicFile}.txt`)
 
         downloadedFiles++
@@ -210,8 +178,6 @@ function getList(list, dir) {
 function download() {
     getList(wl_list, `${download_dir}/wl`)
     getList(bl_list, `${download_dir}/bl`)
-    // sed(`${public_dir}/wl.txt`)
-    // sed(`${public_dir}/bl.txt`)
     console.log(`Run timer: ${min} min (${getDateTime()})`)
 }
 
@@ -219,13 +185,47 @@ function run_updater() {
     download()
 };
 
+
+
+function replace() {
+    return new Promise((resolve, reject) => {
+        runReplacer(`${download_dir}/wl/tmp.txt`)
+        runReplacer(`${download_dir}/bl/tmp.txt`)
+        resolve(`File files is processed!`)
+    })
+}
+
+function downloader() {
+    return new Promise((resolve, reject) => {
+        getList(wl_list, `${download_dir}/wl`)
+        getList(bl_list, `${download_dir}/bl`)
+        resolve("Downloader done!")
+    })
+}
+
+async function updater() {
+    console.log(colorRed, `Worker started. Run downloader.`)
+    const result = await downloader()
+    console.log(colorYellow, 'Promise DOWNLOAD resolved: ' + result)
+    console.log(colorCyan, `Next step 2. Run replacer.`)
+    const proccess = await replace()
+    console.log(colorYellow, 'Promise PROCCESS resolved: ' + proccess)
+    console.log(colorCyan, `Next step 3. Run publisher.`)
+    const sorted = await sort()
+    console.log(colorYellow, 'Promise SORT resolved: ' + sorted)
+    console.log(colorCyan, `Next loop...`)
+}
+
 function always_run() {
-    setInterval(run_updater, waitTime);
+    // setInterval(run_updater, waitTime);
+    setInterval(updater, waitTime);
 };
 
 // Go
 // ---------------------------------------------------\
 helper.checkFolder(download_dir)
+helper.checkFolder(`${download_dir}/wl`)
+helper.checkFolder(`${download_dir}/bl`)
 helper.checkFolder(public_dir)
 
 // First downloads
