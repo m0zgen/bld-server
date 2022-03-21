@@ -1,7 +1,10 @@
 // Globals
 // ---------------------------------------------------\
+const os = require("os");
 const fs = require('fs');
 const path = require('path')
+const cluster = require("cluster");
+
 const express = require("express")
 const replacer = require('replace-in-file')
 
@@ -50,7 +53,8 @@ const public_dir = `${config.public_dir}`
 const min = config.server.update_interval;
 const waitTime = min * 60 * 1000; // = minutes
 
-// Web server
+// Web server and system
+const clusterWorkerSize = os.cpus().length;
 const PORT = process.env.PORT || config.server.port
 const app = express()
 
@@ -195,7 +199,7 @@ function getList(list, dir) {
         sh.exec(`sort -u ${dir}/tmp.txt -o ${public_dir}/${publicFile}.txt`)
 
         downloadedFiles++
-        console.log(`${downloadedFiles}. ${downloadedFile} - downloaded and processed`)
+        console.log(`${downloadedFiles}. ${downloadedFile} - downloaded\n=====================================`)
     })
 }
 
@@ -281,6 +285,32 @@ app.get('/', function(req, res) {
 
 });
 
-app.listen(PORT, function () {
-    console.log(`BLD Server server listening on port ${PORT}`)
-})
+const start = async () => {
+  try {
+      await app.listen(PORT, function () {
+          console.log(colorMagents, `BLD Server server listening on port ${PORT}`)
+      })
+  } catch (err) {
+      app.log.error(err)
+      process.exit(1)
+  }
+}
+
+start()
+
+// TODO: Multithreading
+// if (clusterWorkerSize > 1) {
+//     if (cluster.isMaster) {
+//         for (let i=0; i < clusterWorkerSize; i++) {
+//             cluster.fork();
+//         }
+//
+//         cluster.on("exit", function(worker) {
+//             console.log("Worker", worker.id, " has exited.")
+//         })
+//     } else {
+//         start();
+//     }
+// } else {
+//     start();
+// }

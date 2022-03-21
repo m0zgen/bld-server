@@ -42,7 +42,7 @@ default:
 You can run once this server with needed environment for you:
 
 ```
-NODE_ENV=development node index.js 
+NODE_ENV=development node app.js 
 ```
 
 ### Production config
