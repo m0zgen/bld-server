@@ -2,6 +2,7 @@
 // ---------------------------------------------------\
 const fs = require('fs');
 const path = require('path')
+const http = require('http')
 const https = require('https');
 const express = require("express")
 const replacer = require('replace-in-file')
@@ -58,6 +59,14 @@ const colorCyan='\x1b[36m%s\x1b[0m'
 
 // Actions
 // ---------------------------------------------------\
+
+var urlParser = require('url');
+
+var supportedLibraries = {
+    "http:": require('http'),
+    "https:": require('https')
+};
+
 const downloadFile = (url, dir) => {
 
     return new Promise((resolve, reject) => {
@@ -68,13 +77,29 @@ const downloadFile = (url, dir) => {
         const type = dir.split('/')
         const publicFile = type[type.length - 1]
 
-        https.get(url, res => {
-            if (res.statusCode === 200) {
-                res.pipe(file).on('close', resolve)
-            } else {
-                reject(res.statusCode)
-            }
-        })
+        // Automatically detect input protocol
+        var parsed = urlParser.parse(url);
+        var lib = supportedLibraries[parsed.protocol || "http:"];
+
+        if (lib) {
+            lib.get(url, function (response) {
+                if (response.statusCode === 200) {
+                    response.pipe(file).on('close', resolve)
+                } else {
+                    reject(response.statusCode)
+                }
+            });
+        } else {
+            console.log(`ERROR loG`)
+        }
+
+        // https.get(url, res => {
+        //     if (res.statusCode === 200) {
+        //         res.pipe(file).on('close', resolve)
+        //     } else {
+        //         reject(res.statusCode)
+        //     }
+        // })
     }).catch(error => {
         console.log(colorRed, `Can't download file from ${url} please check this url`)
     })

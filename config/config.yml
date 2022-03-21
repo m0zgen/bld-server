@@ -11,8 +11,9 @@ default:
   lists:
     bl:
       - https://raw.githubusercontent.com/m0zgen/dns-hole/master/dns-blacklist.txt
+#      - http://sysctl.org/cameleon/hosts
     wl:
-      - https://raw1.githubusercontent.com/m0zgen/dns-hole/master/whitelist.txt
-      - https://raw2.githubusercontent.com/m0zgen/dns-hole/master/bld-testing/wl-testing
-      - https://raw3.githubusercontent.com/m0zgen/dns-hole/master/vendors-wl/microsoft.txt
+      - https://raw.githubusercontent.com/m0zgen/dns-hole/master/whitelist.txt
+      - https://raw.githubusercontent.com/m0zgen/dns-hole/master/bld-testing/wl-testing
+      - https://raw.githubusercontent.com/m0zgen/dns-hole/master/vendors-wl/microsoft.txt
       - https://raw.githubusercontent.com/m0zgen/dns-hole/master/vendors-wl/google.txt
