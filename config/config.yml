@@ -12,6 +12,7 @@ default:
     bl:
 #      - TODO: Download files with same names?
       - https://raw.githubusercontent.com/m0zgen/dns-hole/master/dns-blacklist.txt
+      - https://sysctl.org/cameleon/hosts
     wl:
       - https://raw.githubusercontent.com/m0zgen/dns-hole/master/whitelist.txt
       - https://raw.githubusercontent.com/m0zgen/dns-hole/master/bld-testing/wl-testing

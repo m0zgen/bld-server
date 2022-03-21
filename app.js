@@ -113,7 +113,7 @@ function runReplacer(file, target) {
     const options = {
         files: file,
         from: [
-            /(^(^127.0.0.1.|^0.0.0.\d.|^# 0.0.0.\d.|^# 127.0.0.\d|^ ))/gim,
+            /(^(^127.0.0.1. |^0.0.0.\d.|^# 0.0.0.\d.|^# 127.0.0.\d|^ ))/gim,
             /^\s/g,
             /^$/gm,
             / #[a-aA-Z].*$/gm,
@@ -122,7 +122,9 @@ function runReplacer(file, target) {
             /^[!@#\$%\^\&*\)\(+=._-].+$/gm,
             /.*#$/gm,
             /(^[ \t]*\n)/gm,
-            /[!@#$%^&*()_+\=\[\]{};':"\\|,<>\/?].+$/gm
+            /[!@#$%^&*()_+\=\[\]{};':"\\|,<>\/?].+$/gm,
+            /(^[a-z]$|^[a-z][a-z]$|^[a-z][a-z][a-z]$)/gm,
+            /^.*(\.$|-$|-\.$)/gm
         ],
         to: '',
     };
@@ -250,25 +252,10 @@ function always_run() {
     setInterval(updater, waitTime);
 };
 
-// Go
+// WEB Server
 // ---------------------------------------------------\
-helper.checkFolder(download_dir)
-helper.checkFolder(`${download_dir}/wl`)
-helper.checkFolder(`${download_dir}/bl`)
-helper.checkFolder(public_dir)
-
-// First downloads
-download()
-// Fetch lists from interval
-always_run();
-
-// Server
-// ---------------------------------------------------\
-
 app.set("view engine", "pug");
-
 app.use(express.static('public'));
-
 app.get('/', function(req, res) {
 
     var time = getDateTime();
@@ -284,7 +271,6 @@ app.get('/', function(req, res) {
     });
 
 });
-
 const start = async () => {
   try {
       await app.listen(PORT, function () {
@@ -296,6 +282,18 @@ const start = async () => {
   }
 }
 
+// Go
+// ---------------------------------------------------\
+helper.checkFolder(download_dir)
+helper.checkFolder(`${download_dir}/wl`)
+helper.checkFolder(`${download_dir}/bl`)
+helper.checkFolder(public_dir)
+
+// First downloads
+download()
+// Fetch lists from interval
+always_run();
+// Start web server
 start()
 
 // TODO: Multithreading
