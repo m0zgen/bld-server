@@ -75,6 +75,8 @@ const downloadFile = (url, dir) => {
                 reject(res.statusCode)
             }
         })
+    }).catch(error => {
+        console.log(colorRed, `Can't download file from ${url} please check this url`)
     })
 
 }
