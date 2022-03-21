@@ -2,10 +2,15 @@
 // ---------------------------------------------------\
 const fs = require('fs');
 const path = require('path')
-const http = require('http')
-const https = require('https');
 const express = require("express")
 const replacer = require('replace-in-file')
+
+// URL Parser and HTTP detector
+const urlParser = require('url');
+const supportedLibraries = {
+    "http:": require('http'),
+    "https:": require('https')
+};
 
 // As sh or shell
 const sh = require('shelljs')
@@ -59,13 +64,6 @@ const colorCyan='\x1b[36m%s\x1b[0m'
 
 // Actions
 // ---------------------------------------------------\
-
-var urlParser = require('url');
-
-var supportedLibraries = {
-    "http:": require('http'),
-    "https:": require('https')
-};
 
 const downloadFile = (url, dir) => {
 
