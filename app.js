@@ -113,7 +113,7 @@ function runReplacer(file, target) {
     const options = {
         files: file,
         from: [
-            /(^(^127.0.0.1. |^0.0.0.\d.|^# 0.0.0.\d.|^# 127.0.0.\d|^ ))/gim,
+            /(^(^127.0.0.1. |^0.0.0.\d.|^# 0.0.0.\d.|^# 127.0.0.\d|^ |^255.255.255.255.*$))/gim,
             /^\s/g,
             /^$/gm,
             / #[a-aA-Z].*$/gm,
@@ -201,7 +201,7 @@ function getList(list, dir) {
         sh.exec(`sort -u ${dir}/tmp.txt -o ${public_dir}/${publicFile}.txt`)
 
         downloadedFiles++
-        console.log(`${downloadedFiles}. ${downloadedFile} - downloaded\n=====================================`)
+        console.log(`${downloadedFiles}. ${downloadedFile} - downloaded (${getDateTime()})\n=====================================`)
     })
 }
 
@@ -244,6 +244,7 @@ async function updater() {
     console.log(colorCyan, `Next step 3. Run publisher.`)
     const sorted = await sort()
     console.log(colorYellow, 'Promise SORT resolved: ' + sorted)
+    console.log(colorMagents, `Run timer: ${min} min (${getDateTime()})`)
     console.log(colorCyan, `Next loop...`)
 }
 
