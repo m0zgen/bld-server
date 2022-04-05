@@ -89,6 +89,16 @@ You can run once this server with needed environment for you:
 NODE_ENV=development node app.js 
 ```
 
+## Output
+
+Web page:
+
+![](docs/bld-server-web-page.jpg)
+
+Console log:
+
+![](docs/bld-server-output.jpg)
+
 ### Production config
 
 You need to create catalog in `config\prod` and put `config.yml`.
