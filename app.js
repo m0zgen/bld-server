@@ -271,12 +271,18 @@ app.get('/', function(req, res) {
     var wl_count = sh.exec(`cat ${public_dir}/wl.txt | wc -l`)
     var bl_count = sh.exec(`cat ${public_dir}/bl.txt | wc -l`)
 
+    var bl_plain_count = sh.exec(`cat ${public_dir}/bl_plain.txt | wc -l`)
+    var wl_plain_count = sh.exec(`cat ${public_dir}/wl_plain.txt | wc -l`)
+
+
     res.render("index", {
         title: "BLD Server",
         message: "BLD Server is UP!",
         time: time,
         bl_count: bl_count,
-        wl_count: wl_count
+        wl_count: wl_count,
+        bl_plain_count: bl_plain_count,
+        wl_plain_count: wl_plain_count
     });
 
 });
