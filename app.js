@@ -111,7 +111,7 @@ const downloadFile = (url, dir) => {
 }
 
 // Clear file content
-function runReplacer(file, target) {
+function runReplacer(file, plain, target) {
     const options = {
         files: file,
         from: [
@@ -131,9 +131,23 @@ function runReplacer(file, target) {
         to: '',
     };
 
+    const plain_options = {
+        files: file,
+        from: [
+            / #[a-aA-Z].*$/gm,
+            /^#.*$/gm
+        ],
+        to: '',
+    };
+
     try {
-        const results = replacer.sync(options);
-        console.log('Replacement results:', results);
+        if (!plain) {
+            const results = replacer.sync(options);
+            console.log('Replacement results:', results);
+        } else {
+            const results = replacer.sync(plain_options);
+            console.log('Replacement results:', results);
+        }
     }
     catch (error) {
         console.error('Error occurred:', error);
@@ -181,9 +195,9 @@ function getList(list, dir, plain) {
         } else {
             // Move existing file for comparing in future
             copy(downloadedFile, downloadedFile, '_prev')
-            if (!plain){
-                runReplacer(downloadedFile)
-            }
+            // if (!plain){
+                runReplacer(downloadedFile, plain)
+            // }
             copy(downloadedFile, downloadedFile, '_sorted')
         }
 
@@ -194,9 +208,9 @@ function getList(list, dir, plain) {
             console.log(colorYellow, `Files is different, run replacer...`)
             // Move existing file for comparing in future
             copy(downloadedFile, downloadedFile, '_prev')
-            if (!plain){
-                runReplacer(downloadedFile)
-            }
+            // if (!plain){
+                runReplacer(downloadedFile, plain)
+            // }
             copy(downloadedFile, downloadedFile, '_sorted')
         }
 
