@@ -6,6 +6,7 @@ const path = require('path')
 const cluster = require("cluster");
 
 const express = require("express")
+const helmet = require('helmet')
 const replacer = require('replace-in-file')
 
 // URL Parser and HTTP detector
@@ -59,6 +60,10 @@ const waitTime = min * 60 * 1000; // = minutes
 const clusterWorkerSize = os.cpus().length;
 const PORT = process.env.PORT || config.server.port
 const app = express()
+app.use(helmet())
+app.disable('x-powered-by')
+app.use(helmet.noSniff());
+app.use(helmet.xssFilter());
 
 // Colors
 const colorRed='\x1b[31m%s\x1b[0m'
