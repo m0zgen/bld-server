@@ -46,7 +46,9 @@ function getConfig() {
 
 const config = getConfig()
 const bl_list = config.lists.bl;
+const bl_list_plain = config.lists.bl_plain;
 const wl_list = config.lists.wl;
+const wl_list_plain = config.lists.wl_plain;
 
 const download_dir = `./${config.download_dir}`;
 const public_dir = `${config.public_dir}`
@@ -155,7 +157,7 @@ function sort() {
 }
 
 let downloadedFiles = 0
-function getList(list, dir) {
+function getList(list, dir, plain) {
     checkFolder(dir)
     clearFile(`${dir}/tmp.txt`)
 
@@ -179,7 +181,9 @@ function getList(list, dir) {
         } else {
             // Move existing file for comparing in future
             copy(downloadedFile, downloadedFile, '_prev')
-            runReplacer(downloadedFile)
+            if (!plain){
+                runReplacer(downloadedFile)
+            }
             copy(downloadedFile, downloadedFile, '_sorted')
         }
 
@@ -190,7 +194,9 @@ function getList(list, dir) {
             console.log(colorYellow, `Files is different, run replacer...`)
             // Move existing file for comparing in future
             copy(downloadedFile, downloadedFile, '_prev')
-            runReplacer(downloadedFile)
+            if (!plain){
+                runReplacer(downloadedFile)
+            }
             copy(downloadedFile, downloadedFile, '_sorted')
         }
 
@@ -207,16 +213,16 @@ function getList(list, dir) {
 
 // Download urls
 function download() {
-    getList(wl_list, `${download_dir}/wl`)
-    getList(bl_list, `${download_dir}/bl`)
+    getList(wl_list, `${download_dir}/wl`, false)
+    getList(bl_list, `${download_dir}/bl`, false)
+    getList(wl_list_plain, `${download_dir}/wl_plain`, true)
+    getList(bl_list_plain, `${download_dir}/bl_plain`, true)
     console.log(`Run timer: ${min} min (${getDateTime()})`)
 }
 
 function run_updater() {
     download()
 };
-
-
 
 function replace() {
     return new Promise((resolve, reject) => {
@@ -228,8 +234,10 @@ function replace() {
 
 function downloader() {
     return new Promise((resolve, reject) => {
-        getList(wl_list, `${download_dir}/wl`)
-        getList(bl_list, `${download_dir}/bl`)
+        getList(wl_list, `${download_dir}/wl`, false)
+        getList(bl_list, `${download_dir}/bl`, false)
+        getList(wl_list_plain, `${download_dir}/wl_plain`, true)
+        getList(bl_list_plain, `${download_dir}/bl_plain`, true)
         resolve("Downloader done!")
     })
 }
