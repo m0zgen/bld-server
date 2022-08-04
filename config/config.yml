@@ -13,7 +13,7 @@ default:
 #      - TODO: Download files with same names?
       - https://raw.githubusercontent.com/m0zgen/dns-hole/master/dns-blacklist.txt
     bl_plain:
-      - https://raw.githubusercontent.com/m0zgen/dns-hole/master/malisious.txt
+      - https://raw.githubusercontent.com/m0zgen/dns-hole/master/regex/common-bl.txt
     wl:
       - https://raw.githubusercontent.com/m0zgen/dns-hole/master/whitelist.txt
       - https://raw.githubusercontent.com/m0zgen/dns-hole/master/bld-testing/wl-testing
