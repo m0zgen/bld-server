@@ -14,6 +14,7 @@ default:
       - https://raw.githubusercontent.com/m0zgen/dns-hole/master/dns-blacklist.txt
     bl_plain:
       - https://raw.githubusercontent.com/m0zgen/dns-hole/master/regex/common-bl.txt
+      - https://raw.githubusercontent.com/m0zgen/bld-agregator/data/blocklist.txt
     wl:
       - https://raw.githubusercontent.com/m0zgen/dns-hole/master/whitelist.txt
       - https://raw.githubusercontent.com/m0zgen/dns-hole/master/bld-testing/wl-testing
@@ -21,3 +22,4 @@ default:
       - https://raw.githubusercontent.com/m0zgen/dns-hole/master/vendors-wl/google.txt
     wl_plain:
       - https://raw.githubusercontent.com/m0zgen/dns-hole/master/regex/common-wl.txt
+      - https://raw.githubusercontent.com/m0zgen/bld-agregator/data/allowlist.txt

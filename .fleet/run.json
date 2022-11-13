@@ -1,0 +1,9 @@
+{
+    "configurations": [
+        {
+            "name": "run bld-server",
+            "type": "command",
+            "program": "",
+        }
+    ]
+}
