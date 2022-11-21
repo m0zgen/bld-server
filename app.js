@@ -29,7 +29,8 @@ const {checkFolder, getDateTime, clearFile} = require("./modules/helper");
 
 // Config vars init
 // ---------------------------------------------------\
-console.log(`ENV: ${process.env.CONFIG}`)
+const current_ENV = process.env.NODE_ENV
+console.log(`ENV: ${current_ENV}. Current config: ${process.env.CONFIG}`)
 const envpath = path.join(__dirname, ".env")
 
 function getConfig() {
