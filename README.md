@@ -54,9 +54,12 @@ git clone https://github.com/m0zgen/bld-server.git
 ```
 4. `cd` to project catalog and install dependencies:
 ```bash
-npm init 
+npm install 
 ```
 5. Run server
+```
+node app.js 
+```
 
 ### As PM2 
 
@@ -81,7 +84,7 @@ pm2 save
  pm2 log
 ```
 
-## Run server
+## Run server with Environment
 
 You can run once this server with needed environment for you:
 
