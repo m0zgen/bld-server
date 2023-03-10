@@ -3,9 +3,11 @@ default:
     # Server port listening
     port: 3300
     # Interval in minutes
-    update_interval: 1
+    update_interval: 10
   download_dir:
     download
+  upload_dir:
+    upload
   public_dir:
     public
   lists:

@@ -5,6 +5,7 @@
 # Server works dirs
 config/prod*
 download
+upload
 public
 tests
 node_modules
