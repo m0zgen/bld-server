@@ -51,6 +51,7 @@ const bl_list = config.lists.bl;
 const bl_list_plain = config.lists.bl_plain;
 const wl_list = config.lists.wl;
 const wl_list_plain = config.lists.wl_plain;
+const ip_list_plain = config.lists.ip_plain;
 
 const download_dir = `./${config.download_dir}`;
 const public_dir = `${config.public_dir}`
@@ -258,6 +259,7 @@ function downloader() {
         getList(bl_list, `${download_dir}/bl`, false)
         getList(wl_list_plain, `${download_dir}/wl_plain`, true)
         getList(bl_list_plain, `${download_dir}/bl_plain`, true)
+        getList(ip_list_plain, `${download_dir}/ip_plain`, true)
         resolve("Downloader done!")
     })
 }
@@ -294,6 +296,9 @@ app.get('/', function(req, res) {
     var bl_plain_count = sh.exec(`cat ${public_dir}/bl_plain.txt | wc -l`)
     var wl_plain_count = sh.exec(`cat ${public_dir}/wl_plain.txt | wc -l`)
 
+    var ip_plain_count = sh.exec(`cat ${public_dir}/ip_plain.txt | wc -l`)
+
+
 
     res.render("index", {
         title: "BLD Server",
@@ -302,7 +307,8 @@ app.get('/', function(req, res) {
         bl_count: bl_count,
         wl_count: wl_count,
         bl_plain_count: bl_plain_count,
-        wl_plain_count: wl_plain_count
+        wl_plain_count: wl_plain_count,
+        ip_plain_count: ip_plain_count
     });
 
 });
