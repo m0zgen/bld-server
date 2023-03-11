@@ -126,7 +126,7 @@ const downloadFile = (url, dir, cb) => {
                     });
 
                 } else {
-                    reject(response.statusCode)
+                    reject(`Server responded with ${response.statusCode}: ${response.statusMessage}`);
                 }
             });
         } else {
