@@ -97,13 +97,13 @@ const colorCyan='\x1b[36m%s\x1b[0m'
 // Actions
 // ---------------------------------------------------\
 
-const downloadFile = (url, dir) => {
+const downloadFile = (url, dir, cb) => {
 
     return new Promise((resolve, reject) => {
         const splitUrl = url.split('/')
         const filename = splitUrl[splitUrl.length - 1]
         const outputPath = `${dir}/${filename}`
-        // const file = fs.createWriteStream(outputPath)
+        const file = fs.createWriteStream(outputPath)
         const type = dir.split('/')
         const publicFile = type[type.length - 1]
 
@@ -111,54 +111,27 @@ const downloadFile = (url, dir) => {
         var parsed = urlParser.parse(url);
         var lib = supportedLibraries[parsed.protocol || "http:"];
 
-        if (fs.existsSync(outputPath)) {
-            fs.unlink(outputPath, (err) => {
-                if (err) {
-                    console.log(err);
-                }
-                console.log('deleted');
-            })
-        }
-
         if (lib) {
-            const request = lib.get(url, response => {
+            lib.get(url, function (response) {
                 if (response.statusCode === 200) {
-                    const file = fs.createWriteStream(outputPath, { flags: 'wx' });
-                    file.on('finish', () => resolve());
+                    response.pipe(file).on('close', resolve)
+                    file.on('finish', function() {
+                        resolve()
+                        file.close(cb);
+                    })
                     file.on('error', err => {
                         file.close();
                         if (err.code === 'EEXIST') reject('File already exists');
                         else fs.unlink(outputPath, () => reject(err.message)); // Delete temp file
                     });
-                    response.pipe(file);
-                } else if (response.statusCode === 302 || response.statusCode === 301) {
-                    //Recursively follow redirects, only a 200 will resolve.
-                    downloadFile(response.headers.location, outputPath).then(() => resolve());
+
                 } else {
                     reject(`Server responded with ${response.statusCode}: ${response.statusMessage}`);
                 }
             });
-
-            request.on('error', err => {
-                reject(err.message);
-            });
-
         } else {
             console.log(`ERROR loG`)
         }
-
-        // if (lib) {
-        //     lib.get(url, function (response) {
-        //         if (response.statusCode === 200) {
-        //             response.pipe(file).on('close', resolve)
-        //             // console.log("Pipe DOWNLOAD")
-        //         } else {
-        //             reject(response.statusCode)
-        //         }
-        //     });
-        // } else {
-        //     console.log(`ERROR loG`)
-        // }
 
         // https.get(url, res => {
         //     if (res.statusCode === 200) {
