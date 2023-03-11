@@ -67,7 +67,9 @@ const storage = multer.diskStorage({
         cb(null, upload_dir)
     },
     filename: (req, file, cb) => {
-        cb(null, Date.now() + "-" + file.originalname)
+        // cb(null, Date.now() + "-" + file.originalname)
+        cb(null, file.originalname)
+
     },
 })
 
@@ -332,47 +334,46 @@ app.get('/', function(req, res) {
 });
 
 // Single file
-app.post("/upload/single", uploadStorage.single("file"), (req, res) => {
+app.post("/upload/single", uploadStorage.single("file"), (req, res, next) => {
     console.log(req.file)
-    return res.send("Single file")
+
+    if (!req.file || Object.keys(req.file).length === 0) {
+        return res.status(400).send({
+            success: false,
+            message: "No file were uploaded."
+        });
+    }
+
+    // res.end(()=>{
+    //     let uploadedFile = `${upload_dir}/${req.file.originalname}`
+    //     runReplacer(uploadedFile, true)
+    //     console.log(uploadedFile)
+    // })
+
+    return res.send({
+        success: true,
+        message: "File uploaded!"
+    })
+
+
 })
 
 //Multiple files
 app.post("/upload/multiple", uploadStorage.array("file", 10), (req, res) => {
     console.log(req.files)
-    return res.send("Multiple files")
-})
 
-// app.post('/upload', function (req, res){
-//     // let file = req.files.file;
-//     // let upload_to = upload_dir + "/" + file
-//     // console.log(upload_to)
-//
-//     if (!req.files || Object.keys(req.files).length === 0) {
-//         return res.status(400).send('No files were uploaded.');
-//     }
-//
-//     let file = req.files.file;
-//     console.log(file)
-//
-//     console.log(req.files);
-//     res.send({
-//         success: true,
-//         message: "File uploaded!"
-//     })
-//
-//     // file.mv(upload_to, (err, res) =>{
-//     //     if (err)
-//     //         return res.status(500).send(err);
-//     //     else
-//     //         // console.log(req.files);
-//     //         res.send({
-//     //             success: true,
-//     //             message: "File uploaded!"
-//     //         });
-//     // })
-//
-// })
+    if (!req.files || Object.keys(req.files).length === 0) {
+        return res.status(400).send({
+            success: false,
+            message: "No files were uploaded."
+        });
+    }
+
+    return res.send({
+        success: true,
+        message: "Files uploaded!"
+    })
+})
 
 const start = async () => {
   try {
