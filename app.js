@@ -176,7 +176,7 @@ function runReplacer(file, plain, target) {
         from: [
             / #[a-aA-Z].*$/gm,
             /^#.*$/gm,
-            /^[\r\n]/gm,
+            // /^[\r\n]/gm,
             /^0.*$/gm
         ],
         to: '',
