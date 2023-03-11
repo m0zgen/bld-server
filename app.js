@@ -116,8 +116,15 @@ const downloadFile = (url, dir, cb) => {
                 if (response.statusCode === 200) {
                     response.pipe(file).on('close', resolve)
                     file.on('finish', function() {
+                        resolve()
                         file.close(cb);
                     })
+                    file.on('error', err => {
+                        file.close();
+                        if (err.code === 'EEXIST') reject('File already exists');
+                        else fs.unlink(outputPath, () => reject(err.message)); // Delete temp file
+                    });
+
                 } else {
                     reject(response.statusCode)
                 }
