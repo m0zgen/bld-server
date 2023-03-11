@@ -96,6 +96,10 @@ const colorCyan='\x1b[36m%s\x1b[0m'
 
 // Actions
 // ---------------------------------------------------\
+const wait = (seconds) =>
+    new Promise(resolve =>
+        setTimeout(() =>
+            resolve(true), seconds * 1000))
 
 const downloadFile = (url, dir, cb) => {
 
