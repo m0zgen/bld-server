@@ -6,6 +6,7 @@ const path = require('path')
 const cluster = require("cluster");
 
 const express = require("express")
+const multer = require('multer');
 const helmet = require('helmet')
 const replacer = require('replace-in-file')
 
@@ -54,14 +55,29 @@ const wl_list_plain = config.lists.wl_plain;
 const ip_list_plain = config.lists.ip_plain;
 
 const download_dir = `./${config.download_dir}`;
+const upload_dir = `./${config.upload_dir}`;
 const public_dir = `${config.public_dir}`
 const min = config.server.update_interval;
 const waitTime = min * 60 * 1000; // = minutes
+
+// Storage
+//Configuration for Multer
+const storage = multer.diskStorage({
+    destination: (req, file, cb) => {
+        cb(null, upload_dir)
+    },
+    filename: (req, file, cb) => {
+        cb(null, Date.now() + "-" + file.originalname)
+    },
+})
+
+const uploadStorage = multer({ storage: storage })
 
 // Web server and system
 const clusterWorkerSize = os.cpus().length;
 const PORT = process.env.PORT || config.server.port
 const app = express()
+
 app.use(helmet())
 app.disable('x-powered-by')
 app.use(helmet.noSniff());
@@ -143,7 +159,7 @@ function runReplacer(file, plain, target) {
         from: [
             / #[a-aA-Z].*$/gm,
             /^#.*$/gm,
-            /([\r\n]){2,}/gm,
+            /^[\r\n]/gm,
             /^0.*$/gm
         ],
         to: '',
@@ -314,6 +330,50 @@ app.get('/', function(req, res) {
     });
 
 });
+
+// Single file
+app.post("/upload/single", uploadStorage.single("file"), (req, res) => {
+    console.log(req.file)
+    return res.send("Single file")
+})
+
+//Multiple files
+app.post("/upload/multiple", uploadStorage.array("file", 10), (req, res) => {
+    console.log(req.files)
+    return res.send("Multiple files")
+})
+
+// app.post('/upload', function (req, res){
+//     // let file = req.files.file;
+//     // let upload_to = upload_dir + "/" + file
+//     // console.log(upload_to)
+//
+//     if (!req.files || Object.keys(req.files).length === 0) {
+//         return res.status(400).send('No files were uploaded.');
+//     }
+//
+//     let file = req.files.file;
+//     console.log(file)
+//
+//     console.log(req.files);
+//     res.send({
+//         success: true,
+//         message: "File uploaded!"
+//     })
+//
+//     // file.mv(upload_to, (err, res) =>{
+//     //     if (err)
+//     //         return res.status(500).send(err);
+//     //     else
+//     //         // console.log(req.files);
+//     //         res.send({
+//     //             success: true,
+//     //             message: "File uploaded!"
+//     //         });
+//     // })
+//
+// })
+
 const start = async () => {
   try {
       await app.listen(PORT, function () {
@@ -328,6 +388,7 @@ const start = async () => {
 // Go
 // ---------------------------------------------------\
 helper.checkFolder(download_dir)
+helper.checkFolder(upload_dir)
 helper.checkFolder(`${download_dir}/wl`)
 helper.checkFolder(`${download_dir}/bl`)
 helper.checkFolder(public_dir)

@@ -102,6 +102,20 @@ Console log:
 
 ![](docs/bld-server-output.jpg)
 
+## Send files with cUrl
+
+Multiple files:
+```shell
+curl -F file=@file1.txt -F file=@file2.log localhost:3300/upload/multiple -X POST
+```
+
+Single file:
+```shell
+```shell
+curl -F file=@file.txt localhost:3300/upload/single -X POST
+```
+```
+
 ### Production config
 
 You need to create catalog in `config\prod` and put `config.yml`.
