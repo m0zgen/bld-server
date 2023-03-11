@@ -27,6 +27,7 @@ const yaml_config = require('node-yaml-config');
 // Load external functions
 const helper = require("./modules/helper")
 const {checkFolder, getDateTime, clearFile} = require("./modules/helper");
+const {response} = require("express");
 
 // Config vars init
 // ---------------------------------------------------\
@@ -102,7 +103,7 @@ const downloadFile = (url, dir) => {
         const splitUrl = url.split('/')
         const filename = splitUrl[splitUrl.length - 1]
         const outputPath = `${dir}/${filename}`
-        const file = fs.createWriteStream(outputPath)
+        // const file = fs.createWriteStream(outputPath)
         const type = dir.split('/')
         const publicFile = type[type.length - 1]
 
@@ -110,17 +111,54 @@ const downloadFile = (url, dir) => {
         var parsed = urlParser.parse(url);
         var lib = supportedLibraries[parsed.protocol || "http:"];
 
+        if (fs.existsSync(outputPath)) {
+            fs.unlink(outputPath, (err) => {
+                if (err) {
+                    console.log(err);
+                }
+                console.log('deleted');
+            })
+        }
+
         if (lib) {
-            lib.get(url, function (response) {
+            const request = lib.get(url, response => {
                 if (response.statusCode === 200) {
-                    response.pipe(file).on('close', resolve)
+                    const file = fs.createWriteStream(outputPath, { flags: 'wx' });
+                    file.on('finish', () => resolve());
+                    file.on('error', err => {
+                        file.close();
+                        if (err.code === 'EEXIST') reject('File already exists');
+                        else fs.unlink(outputPath, () => reject(err.message)); // Delete temp file
+                    });
+                    response.pipe(file);
+                } else if (response.statusCode === 302 || response.statusCode === 301) {
+                    //Recursively follow redirects, only a 200 will resolve.
+                    downloadFile(response.headers.location, outputPath).then(() => resolve());
                 } else {
-                    reject(response.statusCode)
+                    reject(`Server responded with ${response.statusCode}: ${response.statusMessage}`);
                 }
             });
+
+            request.on('error', err => {
+                reject(err.message);
+            });
+
         } else {
             console.log(`ERROR loG`)
         }
+
+        // if (lib) {
+        //     lib.get(url, function (response) {
+        //         if (response.statusCode === 200) {
+        //             response.pipe(file).on('close', resolve)
+        //             // console.log("Pipe DOWNLOAD")
+        //         } else {
+        //             reject(response.statusCode)
+        //         }
+        //     });
+        // } else {
+        //     console.log(`ERROR loG`)
+        // }
 
         // https.get(url, res => {
         //     if (res.statusCode === 200) {
@@ -301,7 +339,7 @@ async function updater() {
 function always_run() {
     // setInterval(run_updater, waitTime);
     setInterval(updater, waitTime);
-};
+}
 
 // WEB Server
 // ---------------------------------------------------\
