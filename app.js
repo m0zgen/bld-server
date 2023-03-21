@@ -407,6 +407,9 @@ helper.checkFolder(download_dir)
 helper.checkFolder(upload_dir)
 helper.checkFolder(`${download_dir}/wl`)
 helper.checkFolder(`${download_dir}/bl`)
+helper.checkFolder(`${download_dir}/wl_plain`)
+helper.checkFolder(`${download_dir}/bl_plain`)
+helper.checkFolder(`${download_dir}/ip_plain`)
 helper.checkFolder(public_dir)
 
 // First downloads
