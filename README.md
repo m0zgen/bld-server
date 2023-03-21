@@ -1,4 +1,8 @@
-# BLD Server
+# BLD Server (Stopped)
+
+⚠️ All functionality moved to [Cactusd Server](https://github.com/m0zgen/cactusd)
+
+---
 
 It is an update server for BLD DNS Servers or different DNS protection / ad-blocker servers.
 
